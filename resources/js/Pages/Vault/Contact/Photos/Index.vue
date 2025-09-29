@@ -81,17 +81,15 @@
           </div>
 
           <!-- upload -->
-          <uploadcare
-            v-if="data.uploadcare.publicKey && data.canUploadFile"
-            :public-key="data.uploadcare.publicKey"
-            :secure-signature="data.uploadcare.signature"
-            :secure-expire="data.uploadcare.expire"
-            :tabs="'file'"
-            :preview-step="false"
-            @success="onSuccess"
-            @error="onError">
+          <LocalFileUpload
+            v-if="data.canUploadFile"
+            :upload-url="data.url.store"
+            :accepted-types="'image/jpeg,image/png,image/jpg,image/gif,image/webp'"
+            :max-file-size="10485760"
+            @success="onPhotoSuccess"
+            @error="onPhotoError">
             <pretty-button :text="$t('Add a photo')" :icon="'plus'" :class="'w-full sm:w-fit'" />
-          </uploadcare>
+          </LocalFileUpload>
         </div>
 
         <div v-if="localPhotos.length > 0" class="mb-4">
@@ -127,7 +125,7 @@ import { Link } from '@inertiajs/vue3';
 import Layout from '@/Layouts/Layout.vue';
 import PrettyButton from '@/Shared/Form/PrettyButton.vue';
 import Pagination from '@/Components/Pagination.vue';
-import Uploadcare from '@/Components/Uploadcare.vue';
+import LocalFileUpload from '@/Components/LocalFileUpload.vue';
 
 export default {
   components: {
@@ -135,7 +133,7 @@ export default {
     Layout,
     PrettyButton,
     Pagination,
-    Uploadcare,
+    LocalFileUpload,
   },
 
   props: {
@@ -172,27 +170,14 @@ export default {
   },
 
   methods: {
-    onSuccess(file) {
-      this.form.uuid = file.uuid;
-      this.form.name = file.name;
-      this.form.original_url = file.originalUrl;
-      this.form.cdn_url = file.cdnUrl;
-      this.form.mime_type = file.mimeType;
-      this.form.size = file.size;
-
-      this.upload();
+    onPhotoSuccess(fileData) {
+      this.localPhotos.unshift(fileData.response.data);
+      this.flash(this.$t('The photo has been added'), 'success');
     },
 
-    upload() {
-      axios
-        .post(this.data.url.store, this.form)
-        .then((response) => {
-          this.localPhotos.unshift(response.data.data);
-          this.flash(this.$t('The photo has been added'), 'success');
-        })
-        .catch((error) => {
-          this.form.errors = error.response.data;
-        });
+    onPhotoError(error) {
+      console.error('Photo upload failed:', error);
+      this.flash(this.$t('Upload failed'), 'error');
     },
   },
 };

@@ -34,7 +34,7 @@ import Religion from '@/Shared/Modules/Religion.vue';
 import Posts from '@/Shared/Modules/Posts.vue';
 import LifeEvent from '@/Shared/Modules/LifeEvent.vue';
 import QuickFacts from '@/Shared/Modules/QuickFacts.vue';
-import Uploadcare from '@/Components/Uploadcare.vue';
+import LocalFileUpload from '@/Components/LocalFileUpload.vue';
 import { ChevronRight } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -97,27 +97,23 @@ const toggleArchive = () => {
     });
 };
 
-const onSuccess = (file) => {
-  form.uuid = file.uuid;
-  form.name = file.name;
-  form.original_url = file.originalUrl;
-  form.cdn_url = file.cdnUrl;
-  form.mime_type = file.mimeType;
-  form.size = file.size;
-
-  upload();
+const onAvatarSuccess = (fileData) => {
+  router.visit(fileData.response.data);
+  flash(trans('The photo has been added'), 'success');
 };
 
-const upload = () => {
-  axios
-    .put(props.data.url.update_avatar, form)
-    .then((response) => {
-      router.visit(response.data.data);
-      flash(trans('The photo has been added'), 'success');
-    })
-    .catch((error) => {
-      form.errors = error.response.data;
-    });
+const avatarUpload = ref(null);
+
+const onAvatarError = (error) => {
+  console.error('Avatar upload failed:', error);
+  flash(trans('Upload failed'), 'error');
+};
+
+const handleAvatarClick = () => {
+  // Trigger the file picker when avatar is clicked
+  if (avatarUpload.value) {
+    avatarUpload.value.openFilePicker();
+  }
 };
 
 const destroyAvatar = () => {
@@ -206,7 +202,7 @@ const navigateToSelected = () => {
           <div class="p-3 sm:p-3">
             <div v-if="data.contact_information.length > 0" class="mb-8">
               <div v-for="module in data.contact_information" :key="module.id">
-                <ContactAvatar v-if="module.type === 'avatar'" :data="module.data" />
+                <ContactAvatar v-if="module.type === 'avatar'" :data="module.data" @avatar-click="handleAvatarClick" />
 
                 <ContactName v-else-if="module.type === 'contact_names'" :data="module.data" />
 
@@ -232,18 +228,19 @@ const navigateToSelected = () => {
                 </span>
               </li>
               <!-- upload new avatar -->
+              <!-- upload new avatar -->
               <li v-if="!data.avatar.hasFile" class="mb-2">
-                <Uploadcare
-                  v-if="data.avatar.uploadcare.publicKey && data.avatar.canUploadFile"
-                  :public-key="data.avatar.uploadcare.publicKey"
-                  :secure-signature="data.avatar.uploadcare.signature"
-                  :secure-expire="data.avatar.uploadcare.expire"
-                  :tabs="'file'"
-                  :preview-step="false"
-                  @success="onSuccess"
-                  @error="onError">
+                <LocalFileUpload
+                  v-if="data.avatar.canUploadFile"
+                  ref="avatarUpload"
+                  :upload-url="data.url.update_avatar"
+                  :http-method="'PUT'"
+                  :accepted-types="'image/jpeg,image/png,image/jpg,image/gif,image/webp'"
+                  :max-file-size="5242880"
+                  @success="onAvatarSuccess"
+                  @error="onAvatarError">
                   <span class="cursor-pointer text-blue-500 hover:underline"> {{ $t('Upload photo as avatar') }} </span>
-                </Uploadcare>
+                </LocalFileUpload>
               </li>
               <!-- archive contact -->
               <li v-if="data.listed && data.options.can_be_archived" class="mb-2">

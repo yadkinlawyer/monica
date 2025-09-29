@@ -488,7 +488,8 @@ class Contact extends VCardResource
 
                 if ($this->file) {
                     $type = self::AVATAR_TYPE_URL;
-                    $content = 'https://ucarecdn.com/'.$this->file->uuid.'/-/scale_crop/300x300/smart/-/format/auto/-/quality/smart_retina/';
+                    // Use local file URL instead of Uploadcare
+                    $content = $this->file->cdn_url ?: $this->file->original_url;
                 }
 
                 return [

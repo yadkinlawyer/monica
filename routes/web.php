@@ -1,6 +1,7 @@
 <?php
 
 use App\Domains\Contact\ManageAvatar\Web\Controllers\ModuleAvatarController;
+use App\Domains\Contact\ManageAvatar\Web\Controllers\ModuleLocalAvatarController;
 use App\Domains\Contact\ManageCalls\Web\Controllers\ContactModuleCallController;
 use App\Domains\Contact\ManageContact\Web\Controllers\ContactArchiveController;
 use App\Domains\Contact\ManageContact\Web\Controllers\ContactController;
@@ -35,6 +36,7 @@ use App\Domains\Contact\ManageMoodTrackingEvents\Web\Controllers\ContactMoodTrac
 use App\Domains\Contact\ManageNotes\Web\Controllers\ContactModuleNoteController;
 use App\Domains\Contact\ManageNotes\Web\Controllers\ContactNotesController;
 use App\Domains\Contact\ManagePets\Web\Controllers\ContactModulePetController;
+use App\Domains\Contact\ManagePhotos\Web\Controllers\ContactModuleLocalPhotoController;
 use App\Domains\Contact\ManagePhotos\Web\Controllers\ContactModulePhotoController;
 use App\Domains\Contact\ManagePhotos\Web\Controllers\ContactPhotoController;
 use App\Domains\Contact\ManageQuickFacts\Web\Controllers\ContactQuickFactController;
@@ -279,7 +281,7 @@ Route::middleware([
                     Route::get('tabs/{slug}', [ContactPageController::class, 'show'])->name('contact.page.show');
 
                     // avatar
-                    Route::put('avatar', [ModuleAvatarController::class, 'update'])->name('contact.avatar.update');
+                    Route::put('avatar', [ModuleLocalAvatarController::class, 'update'])->name('contact.avatar.update');
                     Route::delete('avatar', [ModuleAvatarController::class, 'destroy'])->name('contact.avatar.destroy');
 
                     // contact feed entries
@@ -359,7 +361,7 @@ Route::middleware([
                     // photos
                     Route::get('photos', [ContactPhotoController::class, 'index'])->name('contact.photo.index');
                     Route::get('photos/{photo}', [ContactPhotoController::class, 'show'])->name('contact.photo.show');
-                    Route::post('photos', [ContactModulePhotoController::class, 'store'])->name('contact.photo.store');
+                    Route::post('photos', [ContactModuleLocalPhotoController::class, 'store'])->name('contact.photo.store');
                     Route::delete('photos/{photo}', [ContactModulePhotoController::class, 'destroy'])->name('contact.photo.destroy');
 
                     // tasks

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -18,7 +17,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use LaravelWebauthn\WebauthnAuthenticatable;
 
-class User extends Authenticatable implements HasLocalePreference, MustVerifyEmail
+class User extends Authenticatable implements HasLocalePreference
 {
     use HasApiTokens;
     use HasFactory;
@@ -156,16 +155,11 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
 
     /**
      * Send the email verification notification.
+     * Since email verification is disabled, automatically mark as verified.
      */
     public function sendEmailVerificationNotification(): void
     {
-        if (config('mail.default') !== 'smtp' || (
-            config('mail.mailers.smtp.username') !== null && config('mail.mailers.smtp.password') !== null
-        )) {
-            parent::sendEmailVerificationNotification();
-        } else {
-            $this->markEmailAsVerified();
-        }
+        $this->markEmailAsVerified();
     }
 
     /**

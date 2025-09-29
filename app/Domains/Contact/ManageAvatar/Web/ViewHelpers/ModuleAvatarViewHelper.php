@@ -2,6 +2,7 @@
 
 namespace App\Domains\Contact\ManageAvatar\Web\ViewHelpers;
 
+use App\Helpers\StorageHelper;
 use App\Models\Contact;
 
 class ModuleAvatarViewHelper
@@ -10,6 +11,7 @@ class ModuleAvatarViewHelper
     {
         return [
             'avatar' => $contact->avatar,
+            'canUploadFile' => StorageHelper::canUploadFile($contact->vault->account),
         ];
     }
 }
